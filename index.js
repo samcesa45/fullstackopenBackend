@@ -1,12 +1,14 @@
 const express = require('express');
-
+const cors = require('cors');
 const app = express();
+
+app.use(cors());
 app.use(express.json());
 
 let notes = [
 	{
 		id: 1,
-		content: 'HTML is easy',
+		content: 'HTML is quite tedious easy',
 		date: '2019-05-30T17:30:31.098Z',
 		important: true,
 	},
@@ -23,11 +25,6 @@ let notes = [
 		important: true,
 	},
 ];
-
-// const app = http.createServer((req, res) => {
-// 	res.writeHead(200, { 'Content-Type': 'application/json' });
-// 	res.end(JSON.stringify(notes));
-// });
 
 app.get('/', (req, res) => {
 	res.send('<h1>Hello world</h1>');
@@ -80,6 +77,7 @@ app.delete('/api/notes/:id', (req, res) => {
 	res.status(204).end();
 });
 
-const PORT = 4000;
-app.listen(PORT);
-console.log(`Server running on port ${PORT}`);
+const PORT = process.env.PORT || 4000;
+app.listen(PORT, () => {
+	console.log(`Server running on port ${PORT}`);
+});
