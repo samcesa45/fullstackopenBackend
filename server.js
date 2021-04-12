@@ -1,13 +1,13 @@
 require('dotenv').config();
-var express = require('express');
-var cors = require('cors');
-var morgan = require('morgan');
-var app = express();
-var Person = require('./models/persons');
+const express = require('express');
+const cors = require('cors');
+const morgan = require('morgan');
+const app = express();
+const Person = require('./models/persons');
 
 app.use(express.static('build'));
-app.use(express.json());
 app.use(cors());
+app.use(express.json());
 
 morgan.token('data', function (req) {
 	if (req.method === 'POST') {
@@ -120,7 +120,7 @@ const errorHandler = (error, req, res, next) => {
 
 app.use(errorHandler);
 
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 4001;
 app.listen(PORT, () => {
 	console.log(`Server running on port ${PORT}`);
 });
