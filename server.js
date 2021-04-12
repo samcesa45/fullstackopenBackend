@@ -2,8 +2,8 @@ require('dotenv').config();
 var express = require('express');
 var cors = require('cors');
 var morgan = require('morgan');
-var Person = require('./models/persons');
 var app = express();
+var Person = require('./models/persons');
 
 app.use(express.static('build'));
 app.use(express.json());
