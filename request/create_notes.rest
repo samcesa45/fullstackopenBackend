@@ -1,7 +1,9 @@
-POST http://localhost:4001/api/persons
+POST http://localhost:5000/api/blogs
 Content-Type: application/json
 
 {
-    "name":"Faith Philip",
-    "number":"090-789-153"
+    "title":"The great king is coming",
+    "author":"Maria Carey",
+    "url":"https://facebook.com",
+    "likes":"3"
 }
