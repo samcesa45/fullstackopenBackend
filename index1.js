@@ -1,7 +1,7 @@
-const app = require('./part4/app');
+const app = require('./noteApp');
 const http = require('http');
-const logger = require('./part4/utils/logger');
-const config = require('./part4/utils/config');
+const config = require('./utils/config');
+const logger = require('./utils/logger');
 
 const server = http.createServer(app);
 
