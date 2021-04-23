@@ -1,17 +1,18 @@
+const jwt = require('jsonwebtoken');
 const notesRouter = require('express').Router();
 const Note = require('../models/note');
+const User = require('../models/user');
 
-notesRouter.get('/', (req, res) => {
-	res.send('<h1>Hello world</h1>');
+// notesRouter.get('/', (req, res) => {
+// 	res.send('<h1>Hello world</h1>');
+// });
+
+notesRouter.get('/', async (req, res) => {
+	const notes = await Note.find({}).populate('user', { username: 1, name: 1 });
+	res.json(notes);
 });
 
-notesRouter.get('/', (req, res) => {
-	Note.find({}).then((notes) => {
-		res.json(notes);
-	});
-});
-
-notesRouter.get('/:id', (req, res, next) => {
+notesRouter.get('/:id', async (req, res) => {
 	// const id = Number(req.params.id);
 	// Note.find((note) => note.id === id);
 	// if (note) {
@@ -20,15 +21,12 @@ notesRouter.get('/:id', (req, res, next) => {
 	// 	res.status(404).end();
 	// }
 
-	Note.findById(req.params.id)
-		.then((note) => {
-			if (note) {
-				res.json(note);
-			} else {
-				res.status(404).end();
-			}
-		})
-		.catch((error) => next(error));
+	const note = await Note.findById(req.params.id);
+	if (note) {
+		res.json(note);
+	} else {
+		res.status(404).end();
+	}
 });
 
 // const generateId = () => {
@@ -37,45 +35,49 @@ notesRouter.get('/:id', (req, res, next) => {
 // 	return maxId + 1;
 // };
 
-notesRouter.post('/', (req, res, next) => {
+const getTokenFrom = (request) => {
+	const authorization = request.get('authorization');
+	if (authorization && authorization.toLowerCase().startsWith('bearer')) {
+		return authorization.substring(7);
+	}
+	return null;
+};
+
+notesRouter.post('/', async (req, res) => {
 	const body = req.body;
+
+	const token = getTokenFrom(req);
+	const decodedToken = jwt.verify(token, process.env.SECRET);
+
+	if (!token || !decodedToken.id) {
+		return res.status(401).json({ error: 'token missing or invalid' });
+	}
+
+	const user = await User.findById(decodedToken.id);
 
 	const note = new Note({
 		content: body.content,
-		important: body.important || false,
-		data: new Date(),
-		// id: generateId(),
+		important: body.important === undefined ? false : body.important,
+		date: new Date(),
+		user: user._id,
 	});
-	if (body.content === undefined) {
-		return res.status(404).json({
-			error: 'content missing',
-		});
-	}
 
-	// notes = notes.concat(note);
+	const savedNote = await note.save();
+	user.notes = user.notes.concat(savedNote._id);
+	await user.save();
 
-	// res.json(note);
-	note
-		.save()
-		.then((savedNote) => savedNote.toJSON())
-		.then((savedAndFormattedNote) => {
-			res.json(savedAndFormattedNote);
-		})
-		.catch((error) => next(error));
+	res.json(savedNote);
 });
-
-notesRouter.delete('/:id', (req, res, next) => {
+// The 'magic' of the library allows us to eliminate the try-catch blocks completely. For example the route for deleting a note
+notesRouter.delete('/:id', async (req, res) => {
 	// const id = Number(req.params.id);
 	// notes = notes.filter((note) => note.id !== id);
 	// res.status(204).end();
-	Note.findByIdAndRemove(req.params.id)
-		.then((result) => {
-			res.status(204).end();
-		})
-		.catch((error) => next(error));
+	await Note.findByIdAndRemove(req.params.id);
+	res.status(204).end();
 });
 
-notesRouter.put('/:id', (req, res, next) => {
+notesRouter.put('/:id', async (req, res) => {
 	const body = req.body;
 
 	const note = {
@@ -83,14 +85,11 @@ notesRouter.put('/:id', (req, res, next) => {
 		important: body.important,
 	};
 
-	Note.findByIdAndUpdate(req.params.id, note, { new: true })
-		.then((updatedNote) => {
-			res.json(updatedNote);
-		})
-		.catch((error) => next(error));
-});
+	const updatedNote = await Note.findByIdAndUpdate(req.params.id, note, {
+		new: true,
+	});
 
-//this has to be the last loaded middleware
-app.use(errorHandler);
+	res.json(updatedNote);
+});
 
 module.exports = notesRouter;

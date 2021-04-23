@@ -1,9 +1,12 @@
 POST http://localhost:5000/api/blogs
 Content-Type: application/json
+Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9
 
 {
-    "title":"The great king is coming",
-    "author":"Maria Carey",
-    "url":"https://facebook.com",
-    "likes":"3"
+     
+   "title":"Single Page Apps use token authorization",
+    "author":"Arto Hellas",
+    "url":"https://artohellas.com",
+    "likes":20
+  
 }

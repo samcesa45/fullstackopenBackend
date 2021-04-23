@@ -1,0 +1,8 @@
+post http://localhost:4001/api/users
+Content-Type: application/application/json
+
+
+{
+    "username":"sam",
+    "password":"justlogin"
+}
