@@ -4,8 +4,8 @@ const express = require('express');
 const loginRouter = express.Router();
 const User = require('../models/user');
 
-loginRouter.post('/', async (req, res) => {
-	const body = req.body;
+loginRouter.post('/', async (request, response) => {
+	const body = request.body;
 
 	const user = await User.findOne({ username: body.username });
 
@@ -15,7 +15,7 @@ loginRouter.post('/', async (req, res) => {
 			: await bcrypt.compare(body.password, user.passwordHash);
 
 	if (!(user && passwordCorrect)) {
-		return res.status(401).json({
+		return response.status(401).json({
 			error: 'invalid username or password',
 		});
 	}
@@ -29,7 +29,9 @@ loginRouter.post('/', async (req, res) => {
 		expiresIn: 60 * 60,
 	});
 
-	res.status(200).send({ token, username: user.username, name: user.name });
+	response
+		.status(200)
+		.send({ token, username: user.username, name: user.name });
 });
 
 module.exports = loginRouter;
